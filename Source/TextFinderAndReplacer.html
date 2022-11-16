@@ -1,0 +1,152 @@
+<html>
+
+<body>
+
+<div id="divUi">
+
+	<div>
+		<h3>Text Replacer</h3>
+		<p>
+			Enter a set of text replacements to make
+			as pairs of lines delimited by blank lines,
+			then the text for replacements to be made in,
+			then click the button to make the replacements.
+		</p>
+
+		<label>Replacements to Make:</label>
+		<button onclick="UiEventHandler.buttonReplacementsToMakeClear_Clicked();">Clear</button>
+		<br />
+		<textarea id="textareaReplacementsToMake" cols="40" rows="8">
+{{one}}
+1
+
+{{two}}
+2
+
+{{three}}
+3
+		</textarea>
+	</div>
+
+	<div>
+		<label>Text to Make Replacements in:</label>
+		<button onclick="UiEventHandler.buttonTextToMakeReplacementsInClear_Clicked();">Clear</button>
+		<br />
+		<textarea id="textareaTextToMakeReplacementsIn" cols="40" rows="8">
+In arithmetic, {{one}} + {{two}} = {{three}}.
+		</textarea>
+	</div>
+
+	<button onclick="UiEventHandler.buttonMakeReplacements_Clicked();">
+		Make Replacements
+	</button>
+
+	<div>
+		<label>Text with Replacements:</label>
+		<button onclick="UiEventHandler.buttonTextWithReplacementsClear_Clicked();">Clear</button>
+		<br />
+		<textarea id="textareaTextWithReplacements" cols="40" rows="8"></textarea>
+	</div>
+
+</div>
+
+<script type="text/javascript">
+
+class TextReplacer
+{
+	constructor(replacementsToMakeAsStringPairs)
+	{
+		this.replacementsToMakeAsStringPairs =
+			replacementsToMakeAsStringPairs;
+	}
+
+	makeReplacementsInText(textToMakeReplacementsIn)
+	{
+		var textWithReplacements = textToMakeReplacementsIn;
+
+		for (var r = 0; r < this.replacementsToMakeAsStringPairs.length; r++)
+		{
+			var replacementToMakeAsStringPair =
+				this.replacementsToMakeAsStringPairs[r];
+
+			var textToBeReplaced = replacementToMakeAsStringPair[0];
+			var textToReplaceWith = replacementToMakeAsStringPair[1];
+
+			textWithReplacements =
+				textWithReplacements.split
+				(
+					textToBeReplaced
+				).join
+				(
+					textToReplaceWith
+				);
+		}
+
+		return textWithReplacements;
+	}
+}
+
+class UiEventHandler
+{
+	static buttonMakeReplacements_Clicked()
+	{
+		var d = document;
+
+		var textareaReplacementsToMake =
+			d.getElementById("textareaReplacementsToMake");
+		var replacementsToMakeAsString =
+			textareaReplacementsToMake.value;
+		var replacementsToMakeAsStrings =
+			replacementsToMakeAsString.split("\n\n");
+		var replacementsToMakeAsStringPairs =
+			replacementsToMakeAsStrings.map(x => x.split("\n"));
+
+		var textareaTextToMakeReplacementsIn =
+			d.getElementById("textareaTextToMakeReplacementsIn");
+		var textToMakeReplacementsIn =
+			textareaTextToMakeReplacementsIn.value;
+
+		var textReplacer = new TextReplacer
+		(
+			replacementsToMakeAsStringPairs
+		);
+
+		var textWithReplacements =
+			textReplacer.makeReplacementsInText(textToMakeReplacementsIn);
+
+		var textareaTextWithReplacements =
+			d.getElementById("textareaTextWithReplacements");
+		textareaTextWithReplacements.value =
+			textWithReplacements;
+	}
+
+	static buttonReplacementsToMakeClear_Clicked()
+	{
+		var d = document;
+		var textareaReplacementsToMake =
+			d.getElementById("textareaReplacementsToMake");
+		textareaReplacementsToMake.value = "";
+	}
+
+	static buttonTextToMakeReplacementsInClear_Clicked()
+	{
+		var d = document;
+		var textareaTextToMakeReplacementsIn =
+			d.getElementById("textareaTextToMakeReplacementsIn");
+		textareaTextToMakeReplacementsIn.value = "";
+	}
+
+	static buttonTextWithReplacementsClear_Clicked()
+	{
+		var d = document;
+		var textareaTextWithReplacements =
+			d.getElementById("textareaTextWithReplacements");
+		textareaTextWithReplacements.value = "";
+	}
+}
+
+</script>
+
+</body>
+
+</html>
