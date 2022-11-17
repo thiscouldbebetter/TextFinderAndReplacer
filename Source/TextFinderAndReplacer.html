@@ -4,19 +4,22 @@
 
 <div id="divUi">
 
-	<div>
-		<h3>Text Replacer</h3>
-		<p>
-			Enter a set of text replacements to make
-			as pairs of lines delimited by blank lines,
-			then the text for replacements to be made in,
-			then click the button to make the replacements.
-		</p>
+	<h3>Text Replacer</h3>
+	<p>
+		Enter a set of text replacements to make
+		as pairs of lines delimited by blank lines,
+		then the text for replacements to be made in,
+		then click the button to make the replacements.
+	</p>
 
+	<div>
 		<label>Replacements to Make:</label>
 		<button onclick="UiEventHandler.buttonReplacementsToMakeClear_Clicked();">Clear</button>
 		<br />
-		<textarea id="textareaReplacementsToMake" cols="40" rows="8">
+		<label>Use Regular Expressions:</label>
+		<input id="checkboxUseRegularExpressions" type="checkbox"></input>
+		<br />
+		<textarea id="textareaReplacementsToMake" cols="40" rows="18">
 {{one}}
 1
 
@@ -25,6 +28,15 @@
 
 {{three}}
 3
+
+'
+//
+
+VisualBasic
+C#
+
+Dim ([A-z]+) As ([A-z]+)
+$2 $1;
 		</textarea>
 	</div>
 
@@ -34,6 +46,9 @@
 		<br />
 		<textarea id="textareaTextToMakeReplacementsIn" cols="40" rows="8">
 In arithmetic, {{one}} + {{two}} = {{three}}.
+
+' A VisualBasic-style variable declaration.
+Dim variableName As VariableType
 		</textarea>
 	</div>
 
@@ -54,8 +69,14 @@ In arithmetic, {{one}} + {{two}} = {{three}}.
 
 class TextReplacer
 {
-	constructor(replacementsToMakeAsStringPairs)
+	constructor
+	(
+		shouldUseRegularExpressions,
+		replacementsToMakeAsStringPairs
+	)
 	{
+		this.shouldUseRegularExpressions =
+			shouldUseRegularExpressions;
 		this.replacementsToMakeAsStringPairs =
 			replacementsToMakeAsStringPairs;
 	}
@@ -69,21 +90,68 @@ class TextReplacer
 			var replacementToMakeAsStringPair =
 				this.replacementsToMakeAsStringPairs[r];
 
-			var textToBeReplaced = replacementToMakeAsStringPair[0];
-			var textToReplaceWith = replacementToMakeAsStringPair[1];
+			var makeReplacementsInText =
+			(
+				this.shouldUseRegularExpressions
+				? this.makeReplacementInText_WithRegularExpressions
+				: this.makeReplacementInText_NoRegularExpressions
+			);
 
-			textWithReplacements =
-				textWithReplacements.split
-				(
-					textToBeReplaced
-				).join
-				(
-					textToReplaceWith
-				);
+			textWithReplacements = makeReplacementsInText
+			(
+				replacementToMakeAsStringPair,
+				textWithReplacements
+			);
 		}
+
+		return textWithReplacements
+	}
+
+	makeReplacementInText_NoRegularExpressions
+	(
+		replacementToMakeAsStringPair,
+		textToMakeReplacementsIn
+	)
+	{
+		var textToBeReplaced = replacementToMakeAsStringPair[0];
+		var textToReplaceWith = replacementToMakeAsStringPair[1];
+
+		var textWithReplacements =
+			textToMakeReplacementsIn.split
+			(
+				textToBeReplaced
+			).join
+			(
+				textToReplaceWith
+			);
 
 		return textWithReplacements;
 	}
+
+	makeReplacementInText_WithRegularExpressions
+	(
+		replacementToMakeAsStringPair,
+		textToMakeReplacementsIn
+	)
+	{
+		var expressionToBeReplaced = new RegExp
+		(
+			replacementToMakeAsStringPair[0], "g" // global
+		);
+
+		var expressionToReplaceWith =
+			replacementToMakeAsStringPair[1];
+
+		var textWithReplacements =
+			textToMakeReplacementsIn.replaceAll
+			(
+				expressionToBeReplaced,
+				expressionToReplaceWith
+			);
+
+		return textWithReplacements;
+	}
+
 }
 
 class UiEventHandler
@@ -91,6 +159,11 @@ class UiEventHandler
 	static buttonMakeReplacements_Clicked()
 	{
 		var d = document;
+
+		var checkboxUseRegularExpressions =
+			d.getElementById("checkboxUseRegularExpressions");
+		var shouldUseRegularExpressions =
+			checkboxUseRegularExpressions.checked;
 
 		var textareaReplacementsToMake =
 			d.getElementById("textareaReplacementsToMake");
@@ -108,6 +181,7 @@ class UiEventHandler
 
 		var textReplacer = new TextReplacer
 		(
+			shouldUseRegularExpressions,
 			replacementsToMakeAsStringPairs
 		);
 
